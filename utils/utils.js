@@ -3,11 +3,7 @@ class utils {
     return "hello world";
   }
 
-  static getResponse(
-    isError = false,
-    data = [],
-    message = "Internal server error!"
-  ) {
+  static getResponse(isError = false, data = [], message = "Internal server error!") {
     if (isError) {
       return {
         isError: true,
@@ -24,4 +20,4 @@ class utils {
   }
 }
 
-export default utils;
+module.exports = utils;
