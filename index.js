@@ -27,6 +27,62 @@ app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cors());
 
+// get the access token for the ali express
+app.get("api/auth/getToken", async (req, res) => {
+  const appKey = "503950";
+  const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
+  const code = "3_503950_HHFc7RdiuxkDUPZDr1TWinDN1825";
+  const timestamp = Date.now().toString();
+  const signMethod = "sha256";
+  const apiPath = "/auth/token/create";
+
+  // Step 1: Populate parameters
+  const parameters = {
+    app_key: appKey,
+    timestamp: timestamp,
+    sign_method: signMethod,
+    code: code,
+  };
+
+  // If using System Interface, add the API name into parameters
+  // parameters['method'] = apiPath;
+
+  // Step 2: Sort parameters
+  const sortedParameters = Object.keys(parameters)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = parameters[key];
+      return acc;
+    });
+
+  // Step 3: Concatenate parameters
+  const queryString = Object.keys(sortedParameters)
+    .map(
+      (key) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(
+          sortedParameters[key]
+        )}`
+    )
+    .join("&");
+
+  console.log(queryString, "--queryString");
+  // If using System Interface, add the API name to the concatenated string
+  // const concatenatedString = `${apiPath}${queryString}`;
+
+  // Step 4: Generate signature
+  const signatureString = `/auth/token/create${queryString}`;
+  const hmac = crypto.createHmac("sha256", Buffer.from(appSecret, "utf-8"));
+  hmac.update(signatureString);
+  const signature = hmac.digest("hex").toUpperCase();
+
+  // Step 5: Assemble main URL
+  const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
+
+  // res.redirect(mainUrl)
+  const result = await axios.post(mainUrl);
+  res.status(200).json({ data: result.data, mainURILDataCommingFrom: mainUrl });
+});
+
 app.get("/hello-word", async (req, res) => {
   res.status(200).json({ message: "Server running very good!" });
 });
@@ -102,62 +158,6 @@ app.get("/api/auth/salla_account/authorize", async (req, res) => {
   const authorizationLink = `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
 
   res.redirect(authorizationLink);
-});
-
-// get the access token for the ali express
-app.get("api/auth/getToken", async (req, res) => {
-  const appKey = "503950";
-  const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
-  const code = "3_503950_HHFc7RdiuxkDUPZDr1TWinDN1825";
-  const timestamp = Date.now().toString();
-  const signMethod = "sha256";
-  const apiPath = "/auth/token/create";
-
-  // Step 1: Populate parameters
-  const parameters = {
-    app_key: appKey,
-    timestamp: timestamp,
-    sign_method: signMethod,
-    code: code,
-  };
-
-  // If using System Interface, add the API name into parameters
-  // parameters['method'] = apiPath;
-
-  // Step 2: Sort parameters
-  const sortedParameters = Object.keys(parameters)
-    .sort()
-    .reduce((acc, key) => {
-      acc[key] = parameters[key];
-      return acc;
-    });
-
-  // Step 3: Concatenate parameters
-  const queryString = Object.keys(sortedParameters)
-    .map(
-      (key) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(
-          sortedParameters[key]
-        )}`
-    )
-    .join("&");
-
-  console.log(queryString, "--queryString");
-  // If using System Interface, add the API name to the concatenated string
-  // const concatenatedString = `${apiPath}${queryString}`;
-
-  // Step 4: Generate signature
-  const signatureString = `/auth/token/create${queryString}`;
-  const hmac = crypto.createHmac("sha256", Buffer.from(appSecret, "utf-8"));
-  hmac.update(signatureString);
-  const signature = hmac.digest("hex").toUpperCase();
-
-  // Step 5: Assemble main URL
-  const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
-
-  // res.redirect(mainUrl)
-  const result = await axios.post(mainUrl);
-  res.status(200).json({ data: result.data, mainURILDataCommingFrom: mainUrl });
 });
 
 // sall account callback uri
