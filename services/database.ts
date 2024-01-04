@@ -1,4 +1,4 @@
-import { MONGO_URI } from "../../config";
+import { MONGO_URI } from "../config";
 const mongoose = require("mongoose");
 
 export const setupDB = async () => {

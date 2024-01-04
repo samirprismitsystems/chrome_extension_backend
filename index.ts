@@ -3,11 +3,12 @@ import dotenv from "dotenv";
 import express, { Application, NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import jwksRsa from "jwks-rsa";
-import { errorHandler } from "./src/middlewares/errorHandler";
-import settingModel from "./src/models/settingModel";
-import mainRoutes from "./src/routes/mainRoutes";
-import { setupDB } from "./src/services/database";
-import utils from "./src/utils/utils";
+import { errorHandler } from "./middlewares/errorHandler";
+import settingModel from "./models/settingModel";
+import mainRoutes from "./routes/mainRoutes";
+import { setupDB } from "./services/database";
+import utils from "./utils/utils";
+
 dotenv.config();
 
 const app: Application = express();
