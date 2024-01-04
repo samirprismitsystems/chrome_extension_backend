@@ -1,11 +1,4 @@
-import { NextFunction, Request, Response } from "express";
-
-export const errorHandler = (
-  err: any,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const errorHandler = (err, req, res, next) => {
   console.log(err, "ERROR-------");
   console.log("Error Handler Middleware run!");
   const errorCode = err.statusCode || 500;
@@ -17,3 +10,5 @@ export const errorHandler = (
     stack: err.stack,
   });
 };
+
+module.exports = errorHandler;

@@ -1,7 +1,6 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose")
 
-
-let settingModel: mongoose.Model<any>;
+let settingModel = null;
 
 try {
   // Try to retrieve the existing model
@@ -23,4 +22,4 @@ try {
   settingModel = mongoose.model("setting", settingSchema);
 }
 
-export default settingModel;
+module.exports = settingModel;

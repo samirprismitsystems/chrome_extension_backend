@@ -3,7 +3,11 @@ class utils {
     return "hello world";
   }
 
-  static getResponse(isError?: boolean, data?: any, message?: string) {
+  static getResponse(
+    isError = false,
+    data = [],
+    message = "Internal server error!"
+  ) {
     if (isError) {
       return {
         isError: true,

@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose")
 
-let userModel: mongoose.Model<any>;
+let userModel = null;
 
 try {
   // Try to retrieve the existing model
@@ -20,4 +20,4 @@ try {
   userModel = mongoose.model("users", userSchema);
 }
 
-export default userModel;
+module.exports = userModel;
