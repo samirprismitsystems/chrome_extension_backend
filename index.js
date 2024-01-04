@@ -6,6 +6,7 @@ const jwksRsa = require("jwks-rsa");
 const settingModel = require("./models/settingModel");
 const userModel = require("./models/userModel");
 const setupDB = require("./services/database");
+const utils = require("./utils/utils");
 const errorHandler = require("./middlewares/errorHandler");
 dotenv.config();
 
