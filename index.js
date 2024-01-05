@@ -165,7 +165,7 @@ app.get("/api/auth/getToken", async (req, res) => {
     const finalSign = md5Hash.toUpperCase();
 
     // Construct the final URL
-    const finalUrl = `${apiUrl}?${new URLSearchParams(
+    const finalUrl = `${url}?${new URLSearchParams(
       sortedParameters
     )}&sign=${finalSign}`;
 
