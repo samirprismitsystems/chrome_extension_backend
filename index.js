@@ -37,7 +37,7 @@ app.get("/api/auth/getToken", async (req, res) => {
     const appKey = "503950";
     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
     const code = req.query.code;
-    const timestamp = Math.floor(Date.now() / 1000).toString(); // Use seconds for timestamp
+    const timestamp = Date.now().toString(); // Use seconds for timestamp
     const signMethod = "md5"; // Change to md5
     const apiPath = "/auth/token/create";
 
