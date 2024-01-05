@@ -82,14 +82,14 @@ app.get("/api/auth/getToken", async (req, res) => {
     const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
 
     const result = await axios.post(mainUrl);
-    res.redirect(
-      `https://chrome-extension-frontend.vercel.app/dashboard?message=${result.data.message}`
-    );
-    // res.status(200).json({
-    //   data: result.data,
-    //   main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
-    //   mainURILDataCommingFrom: mainUrl,
-    // });
+    // res.redirect(
+    //   `https://chrome-extension-frontend.vercel.app/dashboard?message=${result.data.message}`
+    // );
+    res.status(200).json({
+      data: result.data,
+      main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
+      mainURILDataCommingFrom: mainUrl,
+    });
   } catch (error) {
     console.error("Error in /api/auth/getToken:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -100,8 +100,9 @@ app.get("/api/auth/getToken", async (req, res) => {
 app.get("/api/salla_account/callback", async (req, res) => {
   try {
     const { code } = req.query;
-    const clientId = objSalla.clientID;
-    const clientSecret = objSalla.clientSecretKey;
+
+    const clientId = objSalla.clientID || null;
+    const clientSecret = objSalla.clientSecretKey || null;
     const redirectUri =
       "https://chrome-extension-frontend.vercel.app/dashboard";
 
