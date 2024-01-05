@@ -171,7 +171,7 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     const finalUrl = `${url}?${parameters}&sign=${signature}`;
 
-    const response = await axios.post(finalUrl, parameters, {
+    const response = await axios.post(finalUrl, new URLSearchParams(param), {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
       },
