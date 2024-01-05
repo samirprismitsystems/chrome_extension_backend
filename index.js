@@ -148,36 +148,64 @@ app.get("/api/auth/getToken", async (req, res) => {
     param["timestamp"] = Math.floor(Date.now() / 1000);
 
     // Sorting the object properties by key
-    param = Object.fromEntries(Object.entries(param).sort());
+    const sortedParameters = Object.fromEntries(Object.entries(param).sort());
 
-    let parameters = "";
-    for (const [key, value] of Object.entries(param)) {
-      if (!parameters) {
-        parameters = `${key}=${value}`;
-      } else {
-        parameters += `&${key}=${encodeURIComponent(value)}`;
-      }
-    }
+    // Create the sign
+    const signString = appSecret + sign + appSecret;
+    const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
+    const finalSign = md5Hash.toUpperCase();
 
-    let sign = parameters.replace(/&/g, "").replace(/=/g, "");
+    // Construct the final URL
+    const finalUrl = `${apiUrl}?${new URLSearchParams(
+      sortedParameters
+    )}&sign=${finalSign}`;
 
-    const signatureString = `${appSecret}${sign}${appSecret}`;
+    // Make the HTTP request
+    axios
+      .post(finalUrl, new URLSearchParams(param), {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+        },
+      })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error.message);
+      });
 
-    const md5Hash = crypto
-      .createHash("md5")
-      .update(appSecret + sign + appSecret)
-      .digest("hex");
-    const signature = md5Hash.toUpperCase();
 
-    const finalUrl = `${url}?${parameters}&sign=${signature}`;
+    // // Sorting the object properties by key
+    // param = Object.fromEntries(Object.entries(param).sort());
 
-    const response = await axios.post(finalUrl, param, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-      },
-    });
+    // let parameters = "";
+    // for (const [key, value] of Object.entries(param)) {
+    //   if (!parameters) {
+    //     parameters = `${key}=${value}`;
+    //   } else {
+    //     parameters += `&${key}=${encodeURIComponent(value)}`;
+    //   }
+    // }
 
-    res.status(200).json({ data: response.data, finalUrl });
+    // let sign = parameters.replace(/&/g, "").replace(/=/g, "");
+
+    // const signatureString = `${appSecret}${sign}${appSecret}`;
+
+    // const md5Hash = crypto
+    //   .createHash("md5")
+    //   .update(appSecret + sign + appSecret)
+    //   .digest("hex");
+    // const signature = md5Hash.toUpperCase();
+
+    // const finalUrl = `${url}?${parameters}&sign=${signature}`;
+
+    // const response = await axios.post(finalUrl, param, {
+    //   headers: {
+    //     "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+    //   },
+    // });
+
+    // res.status(200).json({ data: response.data, finalUrl });
 
     // // Step 3: Replace characters in the sign string
 
