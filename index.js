@@ -79,7 +79,7 @@ app.get("/api/auth/getToken", async (req, res) => {
     const signature = hmac.digest("hex").toUpperCase();
 
     // Step 5: Assemble main URL
-    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
+    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${"ABCD"}`;
 
     const result = await axios.post(mainUrl);
     // res.redirect(
@@ -102,7 +102,7 @@ app.get("/api/salla_account/callback", async (req, res) => {
     const { code } = req.query;
 
     const clientId = objSalla.clientID || null;
-    const clientSecret = objSalla.clientSecretKey || null;
+    const clientSecret = objSalla.clientSecret || null;
     const redirectUri =
       "https://chrome-extension-frontend.vercel.app/dashboard";
 
