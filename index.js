@@ -101,8 +101,8 @@ app.get("/api/salla_account/callback", async (req, res) => {
     });
 
     const result = sallaCredentials[0];
-
-    const clientId = result.sallaAccount.clientID;
+    if(result && result.sallaAccount){
+          const clientId =  result.sallaAccount.clientID;
     const clientSecret = result.sallaAccount.clientSecretKey;
     const redirectUri =
       "https://chrome-extension-frontend.vercel.app/dashboard";
@@ -138,6 +138,7 @@ app.get("/api/salla_account/callback", async (req, res) => {
       refreshToken,
       redirectURI: `https://chrome-extension-frontend.vercel.app/dashboard?accessToken=${accessToken}`,
     });
+    }
   } catch (error) {
     console.error(
       "Error exchanging authorization code for access token:",
