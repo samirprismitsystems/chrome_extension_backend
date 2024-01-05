@@ -33,57 +33,64 @@ app.use(cors());
 
 // get the access token for the ali express
 app.get("/api/auth/getToken", async (req, res) => {
-  const appKey = "503950";
-  const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
-  const code = req.query.code;
-  const timestamp = Date.now().toString();
-  const signMethod = "sha256";
-  const apiPath = "/auth/token/create";
+  try {
+    const appKey = "503950";
+    const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
+    const code = req.query.code;
+    const timestamp = Date.now().toString();
+    const signMethod = "sha256";
+    const apiPath = "/auth/token/create";
 
-  // Step 1: Populate parameters
-  const parameters = {
-    app_key: appKey,
-    timestamp: timestamp,
-    sign_method: signMethod,
-    code: code,
-  };
+    // Step 1: Populate parameters
+    const parameters = {
+      app_key: appKey,
+      timestamp: timestamp,
+      sign_method: signMethod,
+      code: code,
+    };
 
-  // If using System Interface, add the API name into parameters
-  // parameters['method'] = apiPath;
+    // If using System Interface, add the API name into parameters
+    // parameters['method'] = apiPath;
 
-  // Step 2: Sort parameters
-  const sortedParameters = Object.keys(parameters)
-    .sort()
-    .reduce((acc, key) => {
-      acc[key] = parameters[key];
-      return acc;
+    // Step 2: Sort parameters
+    const sortedParameters = Object.keys(parameters)
+      .sort()
+      .reduce((acc, key) => {
+        acc[key] = parameters[key];
+        return acc;
+      }, {});
+
+    // Step 3: Concatenate parameters
+    const queryString = Object.keys(sortedParameters)
+      .map(
+        (key) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(
+            sortedParameters[key]
+          )}`
+      )
+      .join("&");
+
+    // Step 4: Generate signature
+    const signatureString = `/auth/token/create${queryString}`;
+    const hmac = crypto.createHmac("sha256", Buffer.from(appSecret, "utf-8"));
+    hmac.update(signatureString);
+    const signature = hmac.digest("hex").toUpperCase();
+
+    // Step 5: Assemble main URL
+    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
+
+    const result = await axios.post(mainUrl);
+    res.status(200).json({
+      data: result.data,
+      main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
+      mainURILDataCommingFrom: mainUrl,
     });
-
-  // Step 3: Concatenate parameters
-  const queryString = Object.keys(sortedParameters)
-    .map(
-      (key) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(
-          sortedParameters[key]
-        )}`
-    )
-    .join("&");
-
-  // Step 4: Generate signature
-  const signatureString = `/auth/token/create${queryString}`;
-  const hmac = crypto.createHmac("sha256", Buffer.from(appSecret, "utf-8"));
-  hmac.update(signatureString);
-  const signature = hmac.digest("hex").toUpperCase();
-
-  // Step 5: Assemble main URL
-  const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
-
-  const result = await axios.post(mainUrl);
-  res.redirect(
-    `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`
-  );
-  res.status(200).json({ data: result.data, mainURILDataCommingFrom: mainUrl });
+  } catch (error) {
+    console.error("Error in /api/auth/getToken:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+
 
 // sall account callback uri
 app.get("/api/salla_account/callback", async (req, res) => {
@@ -125,10 +132,11 @@ app.get("/api/salla_account/callback", async (req, res) => {
     const refreshToken = tokenResponse.data.refresh_token;
     // Handle the tokens as needed...
 
-    //  res.status(200).json({ accessToken, refreshToken });
-    res.redirect(
-      `https://chrome-extension-frontend.vercel.app/dashboard?accessToken=${accessToken}`
-    );
+    res.status(200).json({
+      accessToken,
+      refreshToken,
+      redirectURI: `https://chrome-extension-frontend.vercel.app/dashboard?accessToken=${accessToken}`,
+    });
   } catch (error) {
     console.error(
       "Error exchanging authorization code for access token:",
