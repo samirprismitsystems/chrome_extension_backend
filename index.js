@@ -94,29 +94,30 @@ app.get("/api/auth/getToken", async (req, res) => {
 
 // sall account callback uri
 app.get("/api/salla_account/callback", async (req, res) => {
-  const { code } = req.query;
-  const sallaCredentials = await settingModel.find({
-    settingID: req.query.settingID,
-  });
-
-  const result = sallaCredentials[0];
-
-  const clientId = result.sallaAccount.clientID;
-  const clientSecret = result.sallaAccount.clientSecretKey;
-  const redirectUri = "https://chrome-extension-frontend.vercel.app/dashboard";
-
-  // Step 3: Exchange the authorization code for an access token
-  const tokenUrl = "https://accounts.salla.sa/oauth2/token";
-  const tokenData = {
-    client_id: clientId,
-    client_secret: clientSecret,
-    grant_type: "authorization_code",
-    code: code,
-    redirect_uri: redirectUri,
-    scope: "offline_access",
-  };
-
   try {
+    const { code } = req.query;
+    const sallaCredentials = await settingModel.find({
+      settingID: req.query.settingID,
+    });
+
+    const result = sallaCredentials[0];
+
+    const clientId = result.sallaAccount.clientID;
+    const clientSecret = result.sallaAccount.clientSecretKey;
+    const redirectUri =
+      "https://chrome-extension-frontend.vercel.app/dashboard";
+
+    // Step 3: Exchange the authorization code for an access token
+    const tokenUrl = "https://accounts.salla.sa/oauth2/token";
+    const tokenData = {
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: redirectUri,
+      scope: "offline_access",
+    };
+
     const tokenResponse = await axios.post(
       tokenUrl,
       new URLSearchParams(tokenData),
@@ -145,6 +146,7 @@ app.get("/api/salla_account/callback", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // ali express account callback uri
 app.get("/ali_express_account/callback/1865370236", async (req, res) => {
