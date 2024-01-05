@@ -182,7 +182,7 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     res.status(200).json({
       data: result.data,
-      finalSign: finalSign,
+      finalSign: finalSign.data,
       mainURL: finalUrl,
     });
 
