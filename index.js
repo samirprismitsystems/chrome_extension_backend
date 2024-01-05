@@ -38,7 +38,7 @@ app.get("/api/auth/getToken", async (req, res) => {
     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
     const code = req.query.code;
     const timestamp = Date.now().toString();
-    const signMethod = "sha256";
+    const signMethod = "md5"; // Change to md5
     const apiPath = "/auth/token/create";
 
     // Step 1: Populate parameters
@@ -48,9 +48,6 @@ app.get("/api/auth/getToken", async (req, res) => {
       sign_method: signMethod,
       code: code,
     };
-
-    // If using System Interface, add the API name into parameters
-    // parameters['method'] = apiPath;
 
     // Step 2: Sort parameters
     const sortedParameters = Object.keys(parameters)
@@ -72,14 +69,15 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     // Step 4: Generate signature
     const signatureString = `/auth/token/create${queryString}`;
-    const hmac = crypto.createHmac("sha256", Buffer.from(appSecret, "utf-8"));
-    hmac.update(signatureString);
-    const signature = hmac.digest("hex").toUpperCase();
+    const md5 = crypto.createHash("md5");
+    md5.update(signatureString);
+    const signature = md5.digest("hex").toUpperCase();
 
     // Step 5: Assemble main URL
     const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
 
     const result = await axios.post(mainUrl);
+
     res.status(200).json({
       data: result.data,
       main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
@@ -90,7 +88,6 @@ app.get("/api/auth/getToken", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 // sall account callback uri
 app.get("/api/salla_account/callback", async (req, res) => {
   try {
