@@ -68,15 +68,21 @@ app.get("/api/auth/getToken", async (req, res) => {
       .join("&");
 
     // Step 4: Generate signature
-    const signatureString = `${apiPath}${queryString}`;
-    const hmac = crypto.createHmac("sha256", appSecret);
-    hmac.update(Buffer.from(signatureString, "ascii"));
-    const signature = hmac.digest("hex").toUpperCase();
+  const signatureString = `${appSecret}${queryString}${appSecret}`;
+  const signature = crypto
+    .createHash("md5")
+    .update(Buffer.from(signatureString, "utf-8"))
+    .digest("hex")
+    .toUpperCase();
+
+  // Step 4: Assemble final URL
+  const finalUrl = `https://api-sg.aliexpress.com/rest?${queryString}&sign=${signature}`;
+
 
     // Step 5: Assemble main URL
     const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
 
-    const result = await axios.post(mainUrl);
+    const result = await axios.post(finalUrl);
 
     res.status(200).json({
       data: result.data,
