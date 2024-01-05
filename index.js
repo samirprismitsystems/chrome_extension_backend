@@ -227,7 +227,7 @@ app.get("/api/auth/aliexpress/authorize", async (req, res) => {
 
   const clientId = result.aliExpress.appID;
   const redirectUri =
-    "https://chrome-extension-backend.vercel.app/api/auth/getToken";
+    "https://chrome-extension-frontend.vercel.app/dashboard";
 
   const authorizationUrl = "https://api-sg.aliexpress.com/oauth/authorize";
   const authorizationLink = `${authorizationUrl}?response_type=code&force_auth=true&redirect_uri=${redirectUri}&client_id=${clientId}`;
