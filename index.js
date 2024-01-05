@@ -37,7 +37,7 @@ app.get("/api/auth/getToken", async (req, res) => {
     const appKey = "503950";
     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
     const code = req.query.code;
-    const timestamp = Date.now().toString();
+    const timestamp = Math.floor(Date.now() / 1000).toString(); // Use seconds for timestamp
     const signMethod = "md5"; // Change to md5
     const apiPath = "/auth/token/create";
 
@@ -68,9 +68,9 @@ app.get("/api/auth/getToken", async (req, res) => {
       .join("&");
 
     // Step 4: Generate signature
-    const signatureString = `/auth/token/create${queryString}`;
+    const signatureString = `${apiPath}${queryString}`;
     const md5 = crypto.createHash("md5");
-    md5.update(signatureString);
+    md5.update(Buffer.from(signatureString, "utf-8"));
     const signature = md5.digest("hex").toUpperCase();
 
     // Step 5: Assemble main URL
