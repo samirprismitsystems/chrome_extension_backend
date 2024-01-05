@@ -37,56 +37,51 @@ app.get("/api/auth/getToken", async (req, res) => {
     const appKey = "503950";
     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
     const code = req.query.code;
-    const timestamp = Date.now(); // Use seconds for timestamp
+    const timestamp = Date.now().toString();
     const signMethod = "md5"; // Change to md5
     const apiPath = "/auth/token/create";
 
     // Step 1: Populate parameters
-    const url = "https://api-sg.aliexpress.com/sync";
-    const appName = "***";
-
-    const params = {
+    const parameters = {
       app_key: appKey,
-      sign_method: "md5",
       timestamp: timestamp,
+      sign_method: signMethod,
+      code: code,
     };
 
-    // Step 1: Sort parameters
-    const sortedParams = {};
-    Object.keys(params)
+    // Step 2: Sort parameters
+    const sortedParameters = Object.keys(parameters)
       .sort()
-      .forEach((key) => {
-        sortedParams[key] = params[key];
-      });
+      .reduce((acc, key) => {
+        acc[key] = parameters[key];
+        return acc;
+      }, {});
 
-    // Step 2: Concatenate parameters
-    let parameters = "";
-    for (const key in sortedParams) {
-      const value = sortedParams[key];
-      parameters += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
-    }
+    // Step 3: Concatenate parameters
+    const queryString = Object.keys(sortedParameters)
+      .map(
+        (key) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(
+            sortedParameters[key]
+          )}`
+      )
+      .join("&");
 
-    // Remove the trailing "&" character
-    parameters = parameters.slice(0, -1);
+    // Step 4: Generate signature
+    const signatureString = `/auth/token/create${queryString}`;
+    const md5 = crypto.createHash("md5");
+    md5.update(signatureString);
+    const signature = md5.digest("hex").toUpperCase();
 
-    // Step 3: Generate signature
-    const signatureString = `${appSecret}${parameters}${appSecret}`;
-    const signature = crypto
-      .createHash("md5")
-      .update(Buffer.from(signatureString, "utf-8"))
-      .digest("hex")
-      .toUpperCase();
+    // Step 5: Assemble main URL
+    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
 
-    // Step 4: Assemble final URL
-    const finalUrl = `${url}?${parameters}&sign=${signature}`;
-
-    // Step 5: Mak
-    const result = await axios.post(finalUrl);
+    const result = await axios.post(mainUrl);
 
     res.status(200).json({
       data: result.data,
       main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
-      mainURILDataCommingFrom: finalUrl,
+      mainURILDataCommingFrom: mainUrl,
     });
   } catch (error) {
     console.error("Error in /api/auth/getToken:", error);
