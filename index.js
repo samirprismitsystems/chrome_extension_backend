@@ -64,6 +64,9 @@ app.get("/api/auth/getToken", async (req, res) => {
       }
     }
 
+
+    console.log("-------------------------")
+    
     // Step 3: Replace characters in the sign string
     let sign = parameters.replace(/&/g, "").replace(/=/g, "");
     const signatureString = `${appSecret}${sign}${appSecret}`;
@@ -75,12 +78,18 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     // Step 5: Assemble final URL
     const finalUrl = `${url}?${parameters}&sign=${signature}`;
-
+console.log("-------------------------", finalUrl);
     // Make HTTP request using Axios
     const result = await axios.post(finalUrl, null, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
       },
+    });
+
+    res.status(200).json({
+      data: result.data,
+      main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
+      mainURILDataCommingFrom: finalUrl,
     });
 
     // const code = req.query.code;
@@ -119,12 +128,6 @@ app.get("/api/auth/getToken", async (req, res) => {
     // const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${parameters}&sign_method=${signMethod}&sign=${signature}`;
 
     // const result = await axios.post(mainUrl);
-
-    res.status(200).json({
-      data: result.data,
-      main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
-      mainURILDataCommingFrom: mainUrl,
-    });
   } catch (error) {
     console.error("Error in /api/auth/getToken:", error);
     res.status(500).json({ error: "Internal Server Error" });
