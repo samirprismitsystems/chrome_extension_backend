@@ -76,9 +76,7 @@ app.get("/api/auth/getToken", async (req, res) => {
 
   // Step 5: Assemble main URL
   const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
-  
-  res.redirect(mainUrl);
-  
+
   const result = await axios.post(mainUrl);
   res.status(200).json({ data: result.data, mainURILDataCommingFrom: mainUrl });
 });
@@ -153,7 +151,8 @@ app.get("/api/auth/salla_account/authorize", async (req, res) => {
 
   const clientId = result.sallaAccount.clientID;
   const clientSecret = result.sallaAccount.clientSecretKey;
-  const redirectUri = "http://localhost:4000/salla_account/callback/1865370236";
+  const redirectUri =
+    "https://chrome-extension-backend.vercel.app/api/salla_account/callback/";
 
   const authorizationUrl = "https://accounts.salla.sa/oauth2/auth";
   const scope = "offline_access";
@@ -161,20 +160,23 @@ app.get("/api/auth/salla_account/authorize", async (req, res) => {
 
   const authorizationLink = `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
 
-  res.redirect(authorizationLink);
+  res
+    .status(200)
+    .json(utils.getResponse(false, { link: authorizationLink }, "Auth Link"));
 });
 
 // sall account callback uri
-app.get("/salla_account/callback/1865370236", async (req, res) => {
+app.get("/api/salla_account/callback/", async (req, res) => {
   const { code } = req.query;
   const sallaCredentials = await settingModel.find({
     settingID: req.query.settingID,
   });
+
   const result = sallaCredentials[0];
 
   const clientId = result.sallaAccount.clientID;
   const clientSecret = result.sallaAccount.clientSecretKey;
-  const redirectUri = "http://localhost:4000/salla_account/callback/1865370236";
+  const redirectUri = "https://chrome-extension-frontend.vercel.app/dashboard";
 
   // Step 3: Exchange the authorization code for an access token
   const tokenUrl = "https://accounts.salla.sa/oauth2/token";
@@ -187,9 +189,31 @@ app.get("/salla_account/callback/1865370236", async (req, res) => {
     scope: "offline_access",
   };
 
-  res
-    .status(200)
-    .json(utils.getResponse(false, { tokenData, tokenUrl }, "data"));
+   try {
+     const tokenResponse = await axios.post(
+       tokenUrl,
+       new URLSearchParams(tokenData),
+       {
+         headers: {
+           "Content-Type": "application/x-www-form-urlencoded",
+         },
+       }
+     );
+
+     // The response will contain the access token and other information
+     const accessToken = tokenResponse.data.access_token;
+     const refreshToken = tokenResponse.data.refresh_token;
+     // Handle the tokens as needed...
+
+     res.status(200).json({ accessToken, refreshToken });
+   } catch (error) {
+     console.error(
+       "Error exchanging authorization code for access token:",
+       error
+     );
+     res.status(500).json({ error: "Internal Server Error" });
+   }
+
 });
 
 // ali express account callback uri
