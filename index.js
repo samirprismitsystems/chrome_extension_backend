@@ -7,6 +7,9 @@ const settingModel = require("./models/settingModel");
 const userModel = require("./models/userModel");
 const setupDB = require("./services/database");
 const utils = require("./utils/utils");
+const crypto = require("crypto");
+const axios = require("axios");
+
 const errorHandler = require("./middlewares/errorHandler");
 dotenv.config();
 
@@ -22,16 +25,16 @@ setupDB().catch((error) => {
   process.exit(1);
 });
 
-// Middleware
+// Middleware`
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cors());
 
 // get the access token for the ali express
-app.get("api/auth/getToken", async (req, res) => {
+app.get("/api/auth/getToken", async (req, res) => {
   const appKey = "503950";
   const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
-  const code = "3_503950_HHFc7RdiuxkDUPZDr1TWinDN1825";
+  const code = req.query.code;
   const timestamp = Date.now().toString();
   const signMethod = "sha256";
   const apiPath = "/auth/token/create";
@@ -65,10 +68,6 @@ app.get("api/auth/getToken", async (req, res) => {
     )
     .join("&");
 
-  console.log(queryString, "--queryString");
-  // If using System Interface, add the API name to the concatenated string
-  // const concatenatedString = `${apiPath}${queryString}`;
-
   // Step 4: Generate signature
   const signatureString = `/auth/token/create${queryString}`;
   const hmac = crypto.createHmac("sha256", Buffer.from(appSecret, "utf-8"));
@@ -77,8 +76,9 @@ app.get("api/auth/getToken", async (req, res) => {
 
   // Step 5: Assemble main URL
   const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
-
-  // res.redirect(mainUrl)
+  
+  res.redirect(mainUrl);
+  
   const result = await axios.post(mainUrl);
   res.status(200).json({ data: result.data, mainURILDataCommingFrom: mainUrl });
 });
@@ -132,12 +132,16 @@ app.get("/api/auth/aliexpress/authorize", async (req, res) => {
   const result = sallaCredentials[0];
 
   const clientId = result.aliExpress.appID;
-  const redirectUri = "https://prismcodehub.com/aliexpress";
+  const redirectUri =
+    "https://chrome-extension-backend.vercel.app/api/auth/getToken";
 
   const authorizationUrl = "https://api-sg.aliexpress.com/oauth/authorize";
   const authorizationLink = `${authorizationUrl}?response_type=code&force_auth=true&redirect_uri=${redirectUri}&client_id=${clientId}`;
 
-  res.redirect(authorizationLink);
+  // res.redirect(authorizationLink);
+  res
+    .status(200)
+    .json(utils.getResponse(false, { link: authorizationLink }, "Auth Link"));
 });
 
 // salla account authorize

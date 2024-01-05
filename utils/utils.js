@@ -3,6 +3,7 @@ class utils {
     return "hello world";
   }
 
+  // add comments
   static getResponse(isError = false, data = [], message = "Internal server error!") {
     if (isError) {
       return {
