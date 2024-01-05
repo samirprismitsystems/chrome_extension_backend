@@ -37,14 +37,14 @@ app.get("/api/auth/getToken", async (req, res) => {
     const appKey = "503950";
     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
     const code = req.query.code;
-    const timestamp = Date.now().toString(); // Use seconds for timestamp
+    const timestamp = Date.now(); // Use seconds for timestamp
     const signMethod = "md5"; // Change to md5
     const apiPath = "/auth/token/create";
 
     // Step 1: Populate parameters
     const parameters = {
       app_key: appKey,
-      timestamp: timestamp,
+      timestamp: timestamp.toString(),
       sign_method: signMethod,
       code: code,
     };
@@ -69,9 +69,9 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     // Step 4: Generate signature
     const signatureString = `${apiPath}${queryString}`;
-    const md5 = crypto.createHash("sha256");
-    md5.update(Buffer.from(signatureString, "utf-8"));
-    const signature = md5.digest("hex").toUpperCase();
+    const hmac = crypto.createHmac("sha256", appSecret);
+    hmac.update(Buffer.from(signatureString, "utf-8"));
+    const signature = hmac.digest("hex").toUpperCase();
 
     // Step 5: Assemble main URL
     const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
