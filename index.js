@@ -31,6 +31,8 @@ app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cors());
 
+let objSalla = null;
+
 // get the access token for the ali express
 app.get("/api/auth/getToken", async (req, res) => {
   try {
@@ -98,24 +100,8 @@ app.get("/api/auth/getToken", async (req, res) => {
 app.get("/api/salla_account/callback", async (req, res) => {
   try {
     const { code } = req.query;
-    const sallaCredentials = await settingModel.find({
-      settingID: req.query.settingID,
-    });
-
-    if (!sallaCredentials || sallaCredentials.length === 0) {
-      // Handle the case when no credentials are found
-      return res.status(404).json({ error: "Credentials not found" });
-    }
-
-    const result = sallaCredentials[0];
-
-    if (!result || !result.sallaAccount) {
-      // Handle the case when the expected properties are not present
-      return res.status(500).json({ error: "Invalid credentials structure" });
-    }
-
-    const clientId = result.sallaAccount.clientID;
-    const clientSecret = result.sallaAccount.clientSecretKey;
+    const clientId = objSalla.clientID;
+    const clientSecret = objSalla.clientSecretKey;
     const redirectUri =
       "https://chrome-extension-frontend.vercel.app/dashboard";
 
@@ -262,11 +248,17 @@ app.get("/api/auth/salla_account/authorize", async (req, res) => {
   const sallaCredentials = await settingModel.find({
     settingID: req.query.settingID,
   });
+
   const result = sallaCredentials[0];
 
-  const clientId = result.sallaAccount.clientID;
-  const clientSecret = result.sallaAccount.clientSecretKey;
-  const redirectUri =
+  objSalla = {
+    clientID: result.sallaAccount.clientID,
+    clientSecret: result.sallaAccount.clientSecretKey,
+  };
+
+  let clientId = result.sallaAccount.clientID;
+  let clientSecret = result.sallaAccount.clientSecretKey;
+  let redirectUri =
     "https://chrome-extension-backend.vercel.app/api/salla_account/callback";
 
   const authorizationUrl = "https://accounts.salla.sa/oauth2/auth";
