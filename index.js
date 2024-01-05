@@ -35,6 +35,8 @@ app.use(cors());
 app.get("/api/auth/getToken", async (req, res) => {
   try {
     const appKey = "503950";
+    const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
+    
     const params = {
       app_key: appKey,
       code: req.query.code,
@@ -80,7 +82,6 @@ app.get("/api/auth/getToken", async (req, res) => {
       },
     });
 
-    // const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
     // const code = req.query.code;
     // const timestamp = Date.now().toString();
     // const signMethod = "md5"; // Change to md5
