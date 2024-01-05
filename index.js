@@ -163,11 +163,11 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     const signatureString = `${appSecret}${sign}${appSecret}`;
 
-    const signature = crypto
+    const md5Hash = crypto
       .createHash("md5")
-      .update(signatureString, "utf-8")
-      .digest("hex")
-      .toUpperCase();
+      .update(appSecret + sign + appSecret)
+      .digest("hex");
+    const signature = md5Hash.toUpperCase();
 
     const finalUrl = `${url}?${parameters}&sign=${signature}`;
 
