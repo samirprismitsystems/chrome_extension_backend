@@ -149,19 +149,37 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     // Sorting the object properties by key
     param = Object.fromEntries(Object.entries(param).sort());
-    res.status(200).json({ params: param });
-    // Step 2: Concatenate parameters
-    // let parameters = "";
-    // for (const [key, value] of Object.entries(sortedParams)) {
-    //   if (!parameters) {
-    //     parameters = `${key}=${value}`;
-    //   } else {
-    //     parameters += `&${key}=${encodeURIComponent(value)}`;
-    //   }
-    // }
+
+    let parameters = "";
+    for (const [key, value] of Object.entries(param)) {
+      if (!parameters) {
+        parameters = `${key}=${value}`;
+      } else {
+        parameters += `&${key}=${encodeURIComponent(value)}`;
+      }
+    }
+
+    let sign = parameters.replace(/&/g, "").replace(/=/g, "");
+
+    const signatureString = `${appSecret}${sign}${appSecret}`;
+
+    const signature = crypto
+      .createHash("md5")
+      .update(signatureString, "utf-8")
+      .digest("hex")
+      .toUpperCase();
+
+    const finalUrl = `${url}?${parameters}&sign=${signature}`;
+
+    const response = await axios.post(finalUrl, parameters, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+      },
+    });
+
+    res.status(200).json({ data: response.data, finalUrl });
 
     // // Step 3: Replace characters in the sign string
-    // let sign = parameters.replace(/&/g, "").replace(/=/g, "");
 
     // // Step 4: Generate signature
     // const signatureString = `${appSecret}${sign}${appSecret}`;
