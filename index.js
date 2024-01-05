@@ -165,14 +165,14 @@ app.get("/api/auth/getToken", async (req, res) => {
       `https://prismcodehub.com/aliexpress?md5=${signString}`
     );
 
-    console.log(finalSign," finalSign")
+    console.log(finalSign, " finalSign");
 
     //const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
     //const finalSign = md5Hash.toUpperCase();
 
     const finalUrl = `${url}?${new URLSearchParams(
       sortedParameters
-    )}&sign=${finalSign}`;
+    )}&sign=${finalSign.data}`;
 
     const result = await axios.post(finalUrl, new URLSearchParams(param), {
       headers: {
