@@ -70,7 +70,7 @@ app.get("/api/auth/getToken", async (req, res) => {
     // Step 4: Generate signature
     const signatureString = `${apiPath}${queryString}`;
     const hmac = crypto.createHmac("sha256", appSecret);
-    hmac.update(Buffer.from(signatureString, "utf-8"));
+    hmac.update(Buffer.from(signatureString, "ascii"));
     const signature = hmac.digest("hex").toUpperCase();
 
     // Step 5: Assemble main URL
