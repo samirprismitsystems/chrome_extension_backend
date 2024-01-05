@@ -37,7 +37,7 @@ app.use(cors());
 //     const url = "https://api-sg.aliexpress.com/sync";
 //     const appKey = "503950";
 //     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
-    
+
 //     const params = {
 //       app_key: appKey,
 //       code: req.query.code,
@@ -64,9 +64,8 @@ app.use(cors());
 //       }
 //     }
 
-
 //     console.log("-------------------------")
-    
+
 //     // Step 3: Replace characters in the sign string
 //     let sign = parameters.replace(/&/g, "").replace(/=/g, "");
 //     const signatureString = `${appSecret}${sign}${appSecret}`;
@@ -140,23 +139,17 @@ app.get("/api/auth/getToken", async (req, res) => {
     const appKey = "503950"; // Replace with your actual client_id
     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ"; // Replace with your actual client_secret
 
-    const params = {
-      app_key: appKey,
-      code: req.query.code,
-      format: "json",
-      method: "/auth/token/create",
-      sign_method: "md5",
-      timestamp: Math.floor(Date.now() / 1000),
-    };
+    let param = {};
+    param["app_key"] = appKey;
+    param["code"] = req.query.code;
+    param["format"] = "json";
+    param["method"] = "/auth/token/create";
+    param["sign_method"] = "md5";
+    param["timestamp"] = Math.floor(Date.now() / 1000);
 
-    // Step 1: Sort parameters
-    const sortedParams = {};
-    Object.keys(params)
-      .sort()
-      .forEach((key) => {
-        sortedParams[key] = params[key];
-      });
-
+    // Sorting the object properties by key
+    param = Object.fromEntries(Object.entries(param).sort());
+    res.status(200).json({ params: param });
     // Step 2: Concatenate parameters
     let parameters = "";
     for (const [key, value] of Object.entries(sortedParams)) {
