@@ -35,44 +35,88 @@ app.use(cors());
 app.get("/api/auth/getToken", async (req, res) => {
   try {
     const appKey = "503950";
-    const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
-    const code = req.query.code;
-    const timestamp = Date.now().toString();
-    const signMethod = "md5"; // Change to md5
-    const apiPath = "/auth/token/create";
-
     const params = {
       app_key: appKey,
-      sign_method: signMethod,
-      code: code,
-      timestamp: timestamp,
+      code: req.query.code,
+      format: "json",
+      method: "/auth/token/create",
+      sign_method: "md5",
+      timestamp: Date.now(),
     };
 
-    // Step 1: Sort parameters
-    const sortedParams = Object.fromEntries(Object.entries(params).sort());
+    const sortedParams = {};
+    Object.keys(params)
+      .sort()
+      .forEach((key) => {
+        sortedParams[key] = params[key];
+      });
 
     // Step 2: Concatenate parameters
     let parameters = "";
     for (const [key, value] of Object.entries(sortedParams)) {
-      parameters += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
+      if (!parameters) {
+        parameters = `${key}=${value}`;
+      } else {
+        parameters += `&${key}=${encodeURIComponent(value)}`;
+      }
     }
 
-    // Remove the trailing "&" character
-    parameters = parameters.slice(0, -1);
-
-    // Step 3: Generate signature
-    const signatureString = `${appSecret}${parameters}${appSecret}`;
+    // Step 3: Replace characters in the sign string
+    let sign = parameters.replace(/&/g, "").replace(/=/g, "");
+    const signatureString = `${appSecret}${sign}${appSecret}`;
     const signature = crypto
       .createHash("md5")
       .update(signatureString, "utf-8")
       .digest("hex")
       .toUpperCase();
 
-    // Step 5: Assemble main URL
+    // Step 5: Assemble final URL
+    const finalUrl = `${url}?${parameters}&sign=${signature}`;
 
-    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${parameters}&sign_method=${signMethod}&sign=${signature}`;
+    // Make HTTP request using Axios
+    const result = await axios.post(finalUrl, null, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+      },
+    });
 
-    const result = await axios.post(mainUrl);
+    // const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
+    // const code = req.query.code;
+    // const timestamp = Date.now().toString();
+    // const signMethod = "md5"; // Change to md5
+    // const apiPath = "/auth/token/create";
+    // const params = {
+    //   app_key: appKey,
+    //   sign_method: signMethod,
+    //   code: code,
+    //   timestamp: timestamp,
+    // };
+
+    // // Step 1: Sort parameters
+    // const sortedParams = Object.fromEntries(Object.entries(params).sort());
+
+    // // Step 2: Concatenate parameters
+    // let parameters = "";
+    // for (const [key, value] of Object.entries(sortedParams)) {
+    //   parameters += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
+    // }
+
+    // // Remove the trailing "&" character
+    // parameters = parameters.slice(0, -1);
+
+    // // Step 3: Generate signature
+    // const signatureString = `${appSecret}${parameters}${appSecret}`;
+    // const signature = crypto
+    //   .createHash("md5")
+    //   .update(signatureString, "utf-8")
+    //   .digest("hex")
+    //   .toUpperCase();
+
+    // // Step 5: Assemble main URL
+
+    // const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${parameters}&sign_method=${signMethod}&sign=${signature}`;
+
+    // const result = await axios.post(mainUrl);
 
     res.status(200).json({
       data: result.data,
