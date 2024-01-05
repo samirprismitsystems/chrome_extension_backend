@@ -31,8 +31,6 @@ app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cors());
 
-let objSalla = null;
-
 // get the access token for the ali express
 app.get("/api/auth/getToken", async (req, res) => {
   try {
@@ -100,7 +98,6 @@ app.get("/api/auth/getToken", async (req, res) => {
 app.get("/api/salla_account/callback", async (req, res) => {
   try {
     const { code } = req.query;
-
     const clientId = objSalla.clientID || null;
     const clientSecret = objSalla.clientSecret || null;
     const redirectUri =
@@ -248,16 +245,9 @@ app.get("/api/auth/salla_account/authorize", async (req, res) => {
   });
 
   const result = sallaCredentials[0];
-
-  objSalla = {
-    clientID: result.sallaAccount.clientID,
-    clientSecret: result.sallaAccount.clientSecretKey,
-  };
-
   let clientId = result.sallaAccount.clientID;
   let clientSecret = result.sallaAccount.clientSecretKey;
-  let redirectUri =
-    "https://chrome-extension-backend.vercel.app/api/salla_account/callback";
+  let redirectUri = "https://chrome-extension-frontend.vercel.app/settings";
 
   const authorizationUrl = "https://accounts.salla.sa/oauth2/auth";
   const scope = "offline_access";
