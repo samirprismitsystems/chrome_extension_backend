@@ -184,6 +184,7 @@ app.get("/api/auth/getToken", async (req, res) => {
       data: result.data,
       finalSign: finalSign.data,
       mainURL: finalUrl,
+      signString: signString,
     });
 
     // // Sorting the object properties by key
