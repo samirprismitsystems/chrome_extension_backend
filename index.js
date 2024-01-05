@@ -161,23 +161,25 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     let sign = parameters.replace(/&/g, "").replace(/=/g, "");
     const signString = appSecret + sign + appSecret;
-    const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
-    const finalSign = md5Hash.toUpperCase();
+    const finalSign = await axios.get(
+      `https://prismcodehub.com/aliexpress?md5=${signString}`
+    );
 
-    // Construct the final URL
-    const finalUrl = `${url}?${new URLSearchParams(
-      sortedParameters
-    )}&sign=${finalSign}`;
+    //const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
+    //const finalSign = md5Hash.toUpperCase();
 
-    // Make the HTTP request
-    const result = await axios.post(finalUrl, new URLSearchParams(param), {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-      },
-    });
+    // const finalUrl = `${url}?${new URLSearchParams(
+    //   sortedParameters
+    // )}&sign=${finalSign}`;
+
+    // const result = await axios.post(finalUrl, new URLSearchParams(param), {
+    //   headers: {
+    //     "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+    //   },
+    // });
 
     res.status(200).json({
-      data: result.data,
+      finalSign,
     });
 
     // // Sorting the object properties by key
