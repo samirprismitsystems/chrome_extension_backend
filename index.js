@@ -81,90 +81,6 @@ app.get("/api/auth/getToken", async (req, res) => {
   res.status(200).json({ data: result.data, mainURILDataCommingFrom: mainUrl });
 });
 
-app.get("/hello-word", async (req, res) => {
-  res.status(200).json({ message: "Server running very good!" });
-});
-
-const getKey = (header, callback) => {
-  jwksRsa({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri,
-  }).getSigningKey(header.kid, (err, key) => {
-    if (err) {
-      return callback(err);
-    }
-    const signingKey = key.publicKey || key.rsaPublicKey;
-    callback(null, signingKey);
-  });
-};
-
-app.use((req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  jwt.verify(
-    token,
-    getKey,
-    {
-      audience,
-      issuer: issuerBaseURL,
-      algorithms: ["RS256"],
-    },
-    (err, decoded) => {
-      if (err) {
-        return res
-          .status(401)
-          .json(utils.getResponse(true, [], "Unauthorized"));
-      }
-      next();
-    }
-  );
-});
-
-// ali express authorize
-app.get("/api/auth/aliexpress/authorize", async (req, res) => {
-  const sallaCredentials = await settingModel.find({
-    settingID: req.query.settingID,
-  });
-  const result = sallaCredentials[0];
-
-  const clientId = result.aliExpress.appID;
-  const redirectUri =
-    "https://chrome-extension-backend.vercel.app/api/auth/getToken";
-
-  const authorizationUrl = "https://api-sg.aliexpress.com/oauth/authorize";
-  const authorizationLink = `${authorizationUrl}?response_type=code&force_auth=true&redirect_uri=${redirectUri}&client_id=${clientId}`;
-
-  // res.redirect(authorizationLink);
-  res
-    .status(200)
-    .json(utils.getResponse(false, { link: authorizationLink }, "Auth Link"));
-});
-
-// salla account authorize
-app.get("/api/auth/salla_account/authorize", async (req, res) => {
-  const sallaCredentials = await settingModel.find({
-    settingID: req.query.settingID,
-  });
-  const result = sallaCredentials[0];
-
-  const clientId = result.sallaAccount.clientID;
-  const clientSecret = result.sallaAccount.clientSecretKey;
-  const redirectUri =
-    "https://chrome-extension-backend.vercel.app/api/salla_account/callback/";
-
-  const authorizationUrl = "https://accounts.salla.sa/oauth2/auth";
-  const scope = "offline_access";
-  const state = "12345678";
-
-  const authorizationLink = `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
-
-  res
-    .status(200)
-    .json(utils.getResponse(false, { link: authorizationLink }, "Auth Link"));
-});
-
 // sall account callback uri
 app.get("/api/salla_account/callback/", async (req, res) => {
   const { code } = req.query;
@@ -252,6 +168,92 @@ app.get("/ali_express_account/callback/1865370236", async (req, res) => {
     .status(200)
     .json(utils.getResponse(false, { tokenData, tokenUrl }, "data"));
 });
+
+
+app.get("/hello-word", async (req, res) => {
+  res.status(200).json({ message: "Server running very good!" });
+});
+
+const getKey = (header, callback) => {
+  jwksRsa({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri,
+  }).getSigningKey(header.kid, (err, key) => {
+    if (err) {
+      return callback(err);
+    }
+    const signingKey = key.publicKey || key.rsaPublicKey;
+    callback(null, signingKey);
+  });
+};
+
+app.use((req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  jwt.verify(
+    token,
+    getKey,
+    {
+      audience,
+      issuer: issuerBaseURL,
+      algorithms: ["RS256"],
+    },
+    (err, decoded) => {
+      if (err) {
+        return res
+          .status(401)
+          .json(utils.getResponse(true, [], "Unauthorized"));
+      }
+      next();
+    }
+  );
+});
+
+// ali express authorize
+app.get("/api/auth/aliexpress/authorize", async (req, res) => {
+  const sallaCredentials = await settingModel.find({
+    settingID: req.query.settingID,
+  });
+  const result = sallaCredentials[0];
+
+  const clientId = result.aliExpress.appID;
+  const redirectUri =
+    "https://chrome-extension-backend.vercel.app/api/auth/getToken";
+
+  const authorizationUrl = "https://api-sg.aliexpress.com/oauth/authorize";
+  const authorizationLink = `${authorizationUrl}?response_type=code&force_auth=true&redirect_uri=${redirectUri}&client_id=${clientId}`;
+
+  // res.redirect(authorizationLink);
+  res
+    .status(200)
+    .json(utils.getResponse(false, { link: authorizationLink }, "Auth Link"));
+});
+
+// salla account authorize
+app.get("/api/auth/salla_account/authorize", async (req, res) => {
+  const sallaCredentials = await settingModel.find({
+    settingID: req.query.settingID,
+  });
+  const result = sallaCredentials[0];
+
+  const clientId = result.sallaAccount.clientID;
+  const clientSecret = result.sallaAccount.clientSecretKey;
+  const redirectUri =
+    "https://chrome-extension-backend.vercel.app/api/salla_account/callback/";
+
+  const authorizationUrl = "https://accounts.salla.sa/oauth2/auth";
+  const scope = "offline_access";
+  const state = "12345678";
+
+  const authorizationLink = `${authorizationUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+
+  res
+    .status(200)
+    .json(utils.getResponse(false, { link: authorizationLink }, "Auth Link"));
+});
+
 
 // login routes
 app.post("/api/auth/login", async (req, res, next) => {
