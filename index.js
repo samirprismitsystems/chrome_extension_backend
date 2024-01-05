@@ -79,6 +79,9 @@ app.get("/api/auth/getToken", async (req, res) => {
   const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
 
   const result = await axios.post(mainUrl);
+  res.redirect(
+    `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`
+  );
   res.status(200).json({ data: result.data, mainURILDataCommingFrom: mainUrl });
 });
 
