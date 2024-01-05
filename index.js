@@ -170,18 +170,15 @@ app.get("/api/auth/getToken", async (req, res) => {
     )}&sign=${finalSign}`;
 
     // Make the HTTP request
-    axios
-      .post(finalUrl, new URLSearchParams(param), {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-        },
-      })
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error("Error:", error.message);
-      });
+    const result = await axios.post(finalUrl, new URLSearchParams(param), {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+      },
+    });
+
+    res.status(200).json({
+      data: result.data,
+    });
 
     // // Sorting the object properties by key
     // param = Object.fromEntries(Object.entries(param).sort());
