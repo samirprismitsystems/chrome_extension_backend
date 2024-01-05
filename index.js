@@ -168,18 +168,18 @@ app.get("/api/auth/getToken", async (req, res) => {
     //const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
     //const finalSign = md5Hash.toUpperCase();
 
-    // const finalUrl = `${url}?${new URLSearchParams(
-    //   sortedParameters
-    // )}&sign=${finalSign}`;
+    const finalUrl = `${url}?${new URLSearchParams(
+      sortedParameters
+    )}&sign=${finalSign}`;
 
-    // const result = await axios.post(finalUrl, new URLSearchParams(param), {
-    //   headers: {
-    //     "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-    //   },
-    // });
+    const result = await axios.post(finalUrl, new URLSearchParams(param), {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+      },
+    });
 
     res.status(200).json({
-      finalSign,
+      data: result.data,
     });
 
     // // Sorting the object properties by key
