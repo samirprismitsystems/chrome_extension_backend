@@ -42,46 +42,45 @@ app.get("/api/auth/getToken", async (req, res) => {
     const apiPath = "/auth/token/create";
 
     // Step 1: Populate parameters
-    const parameters = {
+    const url = "https://api-sg.aliexpress.com/sync";
+    const appName = "***";
+
+    const params = {
       app_key: appKey,
-      timestamp: timestamp.toString(),
-      sign_method: signMethod,
-      code: code,
+      sign_method: "md5",
+      timestamp: timestamp,
     };
 
-    // Step 2: Sort parameters
-    const sortedParameters = Object.keys(parameters)
+    // Step 1: Sort parameters
+    const sortedParams = {};
+    Object.keys(params)
       .sort()
-      .reduce((acc, key) => {
-        acc[key] = parameters[key];
-        return acc;
-      }, {});
+      .forEach((key) => {
+        sortedParams[key] = params[key];
+      });
 
-    // Step 3: Concatenate parameters
-    const queryString = Object.keys(sortedParameters)
-      .map(
-        (key) =>
-          `${encodeURIComponent(key)}=${encodeURIComponent(
-            sortedParameters[key]
-          )}`
-      )
-      .join("&");
+    // Step 2: Concatenate parameters
+    let parameters = "";
+    for (const key in sortedParams) {
+      const value = sortedParams[key];
+      parameters += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
+    }
 
-    // Step 4: Generate signature
-  const signatureString = `${appSecret}${queryString}${appSecret}`;
-  const signature = crypto
-    .createHash("md5")
-    .update(Buffer.from(signatureString, "utf-8"))
-    .digest("hex")
-    .toUpperCase();
+    // Remove the trailing "&" character
+    parameters = parameters.slice(0, -1);
 
-  // Step 4: Assemble final URL
-  const finalUrl = `https://api-sg.aliexpress.com/rest?${queryString}&sign=${signature}`;
+    // Step 3: Generate signature
+    const signatureString = `${appSecret}${parameters}${appSecret}`;
+    const signature = crypto
+      .createHash("md5")
+      .update(Buffer.from(signatureString, "utf-8"))
+      .digest("hex")
+      .toUpperCase();
 
+    // Step 4: Assemble final URL
+    const finalUrl = `${url}?${parameters}&sign=${signature}`;
 
-    // Step 5: Assemble main URL
-    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
-
+    // Step 5: Mak
     const result = await axios.post(finalUrl);
 
     res.status(200).json({
