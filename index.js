@@ -170,9 +170,9 @@ app.get("/api/auth/getToken", async (req, res) => {
     //const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
     //const finalSign = md5Hash.toUpperCase();
 
-    const finalUrl = `${url}?${new URLSearchParams(
-      sortedParameters
-    )}&sign=${finalSign.data}`;
+    const finalUrl = `${url}?${new URLSearchParams(sortedParameters)}&sign=${
+      finalSign.data
+    }`;
 
     const result = await axios.post(finalUrl, new URLSearchParams(param), {
       headers: {
@@ -182,6 +182,8 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     res.status(200).json({
       data: result.data,
+      finalSign: finalSign,
+      mainURL: finalUrl,
     });
 
     // // Sorting the object properties by key
