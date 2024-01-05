@@ -34,6 +34,7 @@ app.use(cors());
 // get the access token for the ali express
 app.get("/api/auth/getToken", async (req, res) => {
   try {
+    const url = "https://api-sg.aliexpress.com/sync";
     const appKey = "503950";
     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
     
