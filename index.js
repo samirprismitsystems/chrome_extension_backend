@@ -69,7 +69,8 @@ app.get("/api/auth/getToken", async (req, res) => {
       .toUpperCase();
 
     // Step 5: Assemble main URL
-    const mainUrl = `https://api-sg.aliexpress.com/rest?${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
+
+    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${parameters}&sign_method=${signMethod}&sign=${signature}`;
 
     const result = await axios.post(mainUrl);
 
