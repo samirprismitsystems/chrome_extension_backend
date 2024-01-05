@@ -165,6 +165,8 @@ app.get("/api/auth/getToken", async (req, res) => {
       `https://prismcodehub.com/aliexpress?md5=${signString}`
     );
 
+    console.log(finalSign," finalSign")
+
     //const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
     //const finalSign = md5Hash.toUpperCase();
 
