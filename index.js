@@ -20,10 +20,11 @@ const jwksUri = "https://samirqureshi.us.auth0.com/.well-known/jwks.json";
 const audience = "this is identifier";
 const issuerBaseURL = "https://samirqureshi.us.auth0.com/";
 
-setupDB().catch((error) => {
-  console.error("Failed to set up MongoDB:", error.message);
-  process.exit(1);
-});
+async function load() {
+  await setupDB();
+}
+
+load();
 
 // Middleware`
 app.use(express.json({ limit: "5mb" }));
@@ -105,31 +106,33 @@ app.get("/api/salla_account/callback", async (req, res) => {
     scope: "offline_access",
   };
 
-   try {
-     const tokenResponse = await axios.post(
-       tokenUrl,
-       new URLSearchParams(tokenData),
-       {
-         headers: {
-           "Content-Type": "application/x-www-form-urlencoded",
-         },
-       }
-     );
+  try {
+    const tokenResponse = await axios.post(
+      tokenUrl,
+      new URLSearchParams(tokenData),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
-     // The response will contain the access token and other information
-     const accessToken = tokenResponse.data.access_token;
-     const refreshToken = tokenResponse.data.refresh_token;
-     // Handle the tokens as needed...
+    // The response will contain the access token and other information
+    const accessToken = tokenResponse.data.access_token;
+    const refreshToken = tokenResponse.data.refresh_token;
+    // Handle the tokens as needed...
 
-     res.status(200).json({ accessToken, refreshToken });
-   } catch (error) {
-     console.error(
-       "Error exchanging authorization code for access token:",
-       error
-     );
-     res.status(500).json({ error: "Internal Server Error" });
-   }
-
+    //  res.status(200).json({ accessToken, refreshToken });
+    res.redirect(
+      `https://chrome-extension-frontend.vercel.app/dashboard?accessToken=${accessToken}`
+    );
+  } catch (error) {
+    console.error(
+      "Error exchanging authorization code for access token:",
+      error
+    );
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 // ali express account callback uri
@@ -168,7 +171,6 @@ app.get("/ali_express_account/callback/1865370236", async (req, res) => {
     .status(200)
     .json(utils.getResponse(false, { tokenData, tokenUrl }, "data"));
 });
-
 
 app.get("/hello-word", async (req, res) => {
   res.status(200).json({ message: "Server running very good!" });
@@ -253,7 +255,6 @@ app.get("/api/auth/salla_account/authorize", async (req, res) => {
     .status(200)
     .json(utils.getResponse(false, { link: authorizationLink }, "Auth Link"));
 });
-
 
 // login routes
 app.post("/api/auth/login", async (req, res, next) => {
