@@ -41,40 +41,35 @@ app.get("/api/auth/getToken", async (req, res) => {
     const signMethod = "md5"; // Change to md5
     const apiPath = "/auth/token/create";
 
-    // Step 1: Populate parameters
-    const parameters = {
+    const params = {
       app_key: appKey,
-      timestamp: timestamp,
       sign_method: signMethod,
       code: code,
+      timestamp: timestamp,
     };
 
-    // Step 2: Sort parameters
-    const sortedParameters = Object.keys(parameters)
-      .sort()
-      .reduce((acc, key) => {
-        acc[key] = parameters[key];
-        return acc;
-      }, {});
+    // Step 1: Sort parameters
+    const sortedParams = Object.fromEntries(Object.entries(params).sort());
 
-    // Step 3: Concatenate parameters
-    const queryString = Object.keys(sortedParameters)
-      .map(
-        (key) =>
-          `${encodeURIComponent(key)}=${encodeURIComponent(
-            sortedParameters[key]
-          )}`
-      )
-      .join("&");
+    // Step 2: Concatenate parameters
+    let parameters = "";
+    for (const [key, value] of Object.entries(sortedParams)) {
+      parameters += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
+    }
 
-    // Step 4: Generate signature
-    const signatureString = `/auth/token/create${queryString}`;
-    const md5 = crypto.createHash("md5");
-    md5.update(signatureString);
-    const signature = md5.digest("hex").toUpperCase();
+    // Remove the trailing "&" character
+    parameters = parameters.slice(0, -1);
+
+    // Step 3: Generate signature
+    const signatureString = `${appSecret}${parameters}${appSecret}`;
+    const signature = crypto
+      .createHash("md5")
+      .update(signatureString, "utf-8")
+      .digest("hex")
+      .toUpperCase();
 
     // Step 5: Assemble main URL
-    const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
+    const mainUrl = `https://api-sg.aliexpress.com/rest?${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
 
     const result = await axios.post(mainUrl);
 
