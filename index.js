@@ -32,21 +32,124 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cors());
 
 // get the access token for the ali express
+// app.get("/api/auth/getToken", async (req, res) => {
+//   try {
+//     const url = "https://api-sg.aliexpress.com/sync";
+//     const appKey = "503950";
+//     const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
+    
+//     const params = {
+//       app_key: appKey,
+//       code: req.query.code,
+//       format: "json",
+//       method: "/auth/token/create",
+//       sign_method: "md5",
+//       timestamp: Date.now(),
+//     };
+
+//     const sortedParams = {};
+//     Object.keys(params)
+//       .sort()
+//       .forEach((key) => {
+//         sortedParams[key] = params[key];
+//       });
+
+//     // Step 2: Concatenate parameters
+//     let parameters = "";
+//     for (const [key, value] of Object.entries(sortedParams)) {
+//       if (!parameters) {
+//         parameters = `${key}=${value}`;
+//       } else {
+//         parameters += `&${key}=${encodeURIComponent(value)}`;
+//       }
+//     }
+
+
+//     console.log("-------------------------")
+    
+//     // Step 3: Replace characters in the sign string
+//     let sign = parameters.replace(/&/g, "").replace(/=/g, "");
+//     const signatureString = `${appSecret}${sign}${appSecret}`;
+//     const signature = crypto
+//       .createHash("md5")
+//       .update(signatureString, "utf-8")
+//       .digest("hex")
+//       .toUpperCase();
+
+//     // Step 5: Assemble final URL
+//     const finalUrl = `${url}?${parameters}&sign=${signature}`;
+// console.log("-------------------------", finalUrl);
+//     // Make HTTP request using Axios
+//     const result = await axios.post(finalUrl, null, {
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+//       },
+//     });
+
+//     res.status(200).json({
+//       data: result.data,
+//       main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
+//       mainURILDataCommingFrom: finalUrl,
+//     });
+
+//     // const code = req.query.code;
+//     // const timestamp = Date.now().toString();
+//     // const signMethod = "md5"; // Change to md5
+//     // const apiPath = "/auth/token/create";
+//     // const params = {
+//     //   app_key: appKey,
+//     //   sign_method: signMethod,
+//     //   code: code,
+//     //   timestamp: timestamp,
+//     // };
+
+//     // // Step 1: Sort parameters
+//     // const sortedParams = Object.fromEntries(Object.entries(params).sort());
+
+//     // // Step 2: Concatenate parameters
+//     // let parameters = "";
+//     // for (const [key, value] of Object.entries(sortedParams)) {
+//     //   parameters += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
+//     // }
+
+//     // // Remove the trailing "&" character
+//     // parameters = parameters.slice(0, -1);
+
+//     // // Step 3: Generate signature
+//     // const signatureString = `${appSecret}${parameters}${appSecret}`;
+//     // const signature = crypto
+//     //   .createHash("md5")
+//     //   .update(signatureString, "utf-8")
+//     //   .digest("hex")
+//     //   .toUpperCase();
+
+//     // // Step 5: Assemble main URL
+
+//     // const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${parameters}&sign_method=${signMethod}&sign=${signature}`;
+
+//     // const result = await axios.post(mainUrl);
+//   } catch (error) {
+//     console.error("Error in /api/auth/getToken:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
 app.get("/api/auth/getToken", async (req, res) => {
   try {
     const url = "https://api-sg.aliexpress.com/sync";
-    const appKey = "503950";
-    const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ";
-    
+    const appKey = "503950"; // Replace with your actual client_id
+    const appSecret = "nJU3gn6b9nGCl9Ohxs7jDg33ROqq3WTZ"; // Replace with your actual client_secret
+
     const params = {
       app_key: appKey,
       code: req.query.code,
       format: "json",
       method: "/auth/token/create",
       sign_method: "md5",
-      timestamp: Date.now(),
+      timestamp: Math.floor(Date.now() / 1000),
     };
 
+    // Step 1: Sort parameters
     const sortedParams = {};
     Object.keys(params)
       .sort()
@@ -64,11 +167,10 @@ app.get("/api/auth/getToken", async (req, res) => {
       }
     }
 
-
-    console.log("-------------------------")
-    
     // Step 3: Replace characters in the sign string
     let sign = parameters.replace(/&/g, "").replace(/=/g, "");
+
+    // Step 4: Generate signature
     const signatureString = `${appSecret}${sign}${appSecret}`;
     const signature = crypto
       .createHash("md5")
@@ -78,61 +180,21 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     // Step 5: Assemble final URL
     const finalUrl = `${url}?${parameters}&sign=${signature}`;
-console.log("-------------------------", finalUrl);
+
     // Make HTTP request using Axios
-    const result = await axios.post(finalUrl, null, {
+    const response = await axios.post(finalUrl, null, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
       },
     });
 
-    res.status(200).json({
-      data: result.data,
-      main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
-      mainURILDataCommingFrom: finalUrl,
-    });
-
-    // const code = req.query.code;
-    // const timestamp = Date.now().toString();
-    // const signMethod = "md5"; // Change to md5
-    // const apiPath = "/auth/token/create";
-    // const params = {
-    //   app_key: appKey,
-    //   sign_method: signMethod,
-    //   code: code,
-    //   timestamp: timestamp,
-    // };
-
-    // // Step 1: Sort parameters
-    // const sortedParams = Object.fromEntries(Object.entries(params).sort());
-
-    // // Step 2: Concatenate parameters
-    // let parameters = "";
-    // for (const [key, value] of Object.entries(sortedParams)) {
-    //   parameters += `${encodeURIComponent(key)}=${encodeURIComponent(value)}&`;
-    // }
-
-    // // Remove the trailing "&" character
-    // parameters = parameters.slice(0, -1);
-
-    // // Step 3: Generate signature
-    // const signatureString = `${appSecret}${parameters}${appSecret}`;
-    // const signature = crypto
-    //   .createHash("md5")
-    //   .update(signatureString, "utf-8")
-    //   .digest("hex")
-    //   .toUpperCase();
-
-    // // Step 5: Assemble main URL
-
-    // const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${parameters}&sign_method=${signMethod}&sign=${signature}`;
-
-    // const result = await axios.post(mainUrl);
+    res.status(200).json(response.data);
   } catch (error) {
-    console.error("Error in /api/auth/getToken:", error);
+    console.error("Error:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 // sall account callback uri
 app.get("/api/salla_account/callback", async (req, res) => {
   try {
