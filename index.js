@@ -87,7 +87,7 @@ app.get("/api/auth/getToken", async (req, res) => {
     res.status(200).json({
       data: result.data,
       main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
-      mainURILDataCommingFrom: mainUrl,
+      mainURILDataCommingFrom: finalUrl,
     });
   } catch (error) {
     console.error("Error in /api/auth/getToken:", error);
