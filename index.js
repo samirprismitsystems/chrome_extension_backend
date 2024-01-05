@@ -117,15 +117,11 @@ app.get("/api/salla_account/callback", async (req, res) => {
       scope: "offline_access",
     };
 
-    const tokenResponse = await axios.post(
-      tokenUrl,
-      new URLSearchParams(tokenData),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    const tokenResponse = await axios.post(tokenUrl, tokenData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
 
     // The response will contain the access token and other information
     const accessToken = tokenResponse.data.access_token;
@@ -135,6 +131,7 @@ app.get("/api/salla_account/callback", async (req, res) => {
     res.status(200).json({
       accessToken,
       refreshToken,
+      tokenURL: tokenUrl,
       redirectURI: `https://chrome-extension-frontend.vercel.app/dashboard?accessToken=${accessToken}`,
     });
   } catch (error) {
