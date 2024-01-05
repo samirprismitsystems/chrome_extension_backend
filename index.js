@@ -151,37 +151,37 @@ app.get("/api/auth/getToken", async (req, res) => {
     param = Object.fromEntries(Object.entries(param).sort());
     res.status(200).json({ params: param });
     // Step 2: Concatenate parameters
-    let parameters = "";
-    for (const [key, value] of Object.entries(sortedParams)) {
-      if (!parameters) {
-        parameters = `${key}=${value}`;
-      } else {
-        parameters += `&${key}=${encodeURIComponent(value)}`;
-      }
-    }
+    // let parameters = "";
+    // for (const [key, value] of Object.entries(sortedParams)) {
+    //   if (!parameters) {
+    //     parameters = `${key}=${value}`;
+    //   } else {
+    //     parameters += `&${key}=${encodeURIComponent(value)}`;
+    //   }
+    // }
 
-    // Step 3: Replace characters in the sign string
-    let sign = parameters.replace(/&/g, "").replace(/=/g, "");
+    // // Step 3: Replace characters in the sign string
+    // let sign = parameters.replace(/&/g, "").replace(/=/g, "");
 
-    // Step 4: Generate signature
-    const signatureString = `${appSecret}${sign}${appSecret}`;
-    const signature = crypto
-      .createHash("md5")
-      .update(signatureString, "utf-8")
-      .digest("hex")
-      .toUpperCase();
+    // // Step 4: Generate signature
+    // const signatureString = `${appSecret}${sign}${appSecret}`;
+    // const signature = crypto
+    //   .createHash("md5")
+    //   .update(signatureString, "utf-8")
+    //   .digest("hex")
+    //   .toUpperCase();
 
-    // Step 5: Assemble final URL
-    const finalUrl = `${url}?${parameters}&sign=${signature}`;
+    // // Step 5: Assemble final URL
+    // const finalUrl = `${url}?${parameters}&sign=${signature}`;
 
-    // Make HTTP request using Axios
-    const response = await axios.post(finalUrl, null, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-      },
-    });
+    // // Make HTTP request using Axios
+    // const response = await axios.post(finalUrl, null, {
+    //   headers: {
+    //     "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+    //   },
+    // });
 
-    res.status(200).json(response.data);
+    // res.status(200).json(response.data);
   } catch (error) {
     console.error("Error:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
