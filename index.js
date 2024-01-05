@@ -101,7 +101,7 @@ app.get("/api/salla_account/callback", async (req, res) => {
     const clientId = objSalla.clientID || null;
     const clientSecret = objSalla.clientSecret || null;
     const redirectUri =
-      "https://chrome-extension-frontend.vercel.app/dashboard";
+      "https://chrome-extension-frontend.vercel.app/settings";
 
     // Step 3: Exchange the authorization code for an access token
     const tokenUrl = "https://accounts.salla.sa/oauth2/token";
