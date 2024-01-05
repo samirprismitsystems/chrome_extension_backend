@@ -82,7 +82,7 @@ app.get("/api/auth/getToken", async (req, res) => {
 });
 
 // sall account callback uri
-app.get("/api/salla_account/callback/", async (req, res) => {
+app.get("/api/salla_account/callback", async (req, res) => {
   const { code } = req.query;
   const sallaCredentials = await settingModel.find({
     settingID: req.query.settingID,
@@ -241,7 +241,7 @@ app.get("/api/auth/salla_account/authorize", async (req, res) => {
   const clientId = result.sallaAccount.clientID;
   const clientSecret = result.sallaAccount.clientSecretKey;
   const redirectUri =
-    "https://chrome-extension-backend.vercel.app/api/salla_account/callback/";
+    "https://chrome-extension-backend.vercel.app/api/salla_account/callback";
 
   const authorizationUrl = "https://accounts.salla.sa/oauth2/auth";
   const scope = "offline_access";
