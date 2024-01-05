@@ -80,17 +80,19 @@ app.get("/api/auth/getToken", async (req, res) => {
     const mainUrl = `https://api-sg.aliexpress.com/rest${apiPath}?${queryString}&sign_method=${signMethod}&sign=${signature}`;
 
     const result = await axios.post(mainUrl);
-    res.status(200).json({
-      data: result.data,
-      main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
-      mainURILDataCommingFrom: mainUrl,
-    });
+    res.redirect(
+      `https://chrome-extension-frontend.vercel.app/dashboard?message=${result.data.message}`
+    );
+    // res.status(200).json({
+    //   data: result.data,
+    //   main: `https://api-sg.aliexpress.com/auth/token/create?code=${req.query.code}`,
+    //   mainURILDataCommingFrom: mainUrl,
+    // });
   } catch (error) {
     console.error("Error in /api/auth/getToken:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // sall account callback uri
 app.get("/api/salla_account/callback", async (req, res) => {
@@ -100,9 +102,19 @@ app.get("/api/salla_account/callback", async (req, res) => {
       settingID: req.query.settingID,
     });
 
+    if (!sallaCredentials || sallaCredentials.length === 0) {
+      // Handle the case when no credentials are found
+      return res.status(404).json({ error: "Credentials not found" });
+    }
+
     const result = sallaCredentials[0];
-    if(result && result.sallaAccount){
-          const clientId =  result.sallaAccount.clientID;
+
+    if (!result || !result.sallaAccount) {
+      // Handle the case when the expected properties are not present
+      return res.status(500).json({ error: "Invalid credentials structure" });
+    }
+
+    const clientId = result.sallaAccount.clientID;
     const clientSecret = result.sallaAccount.clientSecretKey;
     const redirectUri =
       "https://chrome-extension-frontend.vercel.app/dashboard";
@@ -138,7 +150,6 @@ app.get("/api/salla_account/callback", async (req, res) => {
       refreshToken,
       redirectURI: `https://chrome-extension-frontend.vercel.app/dashboard?accessToken=${accessToken}`,
     });
-    }
   } catch (error) {
     console.error(
       "Error exchanging authorization code for access token:",
@@ -147,7 +158,6 @@ app.get("/api/salla_account/callback", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // ali express account callback uri
 app.get("/ali_express_account/callback/1865370236", async (req, res) => {
