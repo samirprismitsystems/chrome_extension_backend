@@ -150,7 +150,16 @@ app.get("/api/auth/getToken", async (req, res) => {
     // Sorting the object properties by key
     const sortedParameters = Object.fromEntries(Object.entries(param).sort());
 
-    // Create the sign
+    let parameters = "";
+    for (const [key, value] of Object.entries(sortedParameters)) {
+      if (!parameters) {
+        parameters = `${key}=${value}`;
+      } else {
+        parameters += `&${key}=${encodeURIComponent(value)}`;
+      }
+    }
+
+    let sign = parameters.replace(/&/g, "").replace(/=/g, "");
     const signString = appSecret + sign + appSecret;
     const md5Hash = crypto.createHash("md5").update(signString).digest("hex");
     const finalSign = md5Hash.toUpperCase();
@@ -173,7 +182,6 @@ app.get("/api/auth/getToken", async (req, res) => {
       .catch((error) => {
         console.error("Error:", error.message);
       });
-
 
     // // Sorting the object properties by key
     // param = Object.fromEntries(Object.entries(param).sort());
