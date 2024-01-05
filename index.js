@@ -69,7 +69,7 @@ app.get("/api/auth/getToken", async (req, res) => {
 
     // Step 4: Generate signature
     const signatureString = `${apiPath}${queryString}`;
-    const md5 = crypto.createHash("md5");
+    const md5 = crypto.createHash("sha256");
     md5.update(Buffer.from(signatureString, "utf-8"));
     const signature = md5.digest("hex").toUpperCase();
 
