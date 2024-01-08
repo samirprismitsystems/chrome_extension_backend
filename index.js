@@ -27,8 +27,8 @@ async function load() {
 load();
 
 // Middleware`
-app.use(express.json({ limit: "5mb" }));
-app.use(express.urlencoded({ extended: true, limit: "5mb" }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cors());
 
 // get the access token for the ali express
